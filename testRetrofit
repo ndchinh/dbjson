@@ -1,0 +1,54 @@
+package info.androidhive.retrofit;
+
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
+import info.androidhive.retrofit.activity.MainActivity;
+import info.androidhive.retrofit.model.MoviesResponse;
+import info.androidhive.retrofit.rest.ApiInterface;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class testRetrofit {
+
+    private MainActivity activity;
+
+    private ApiInterface mockApi;
+
+    @Captor
+    private ArgumentCaptor<Callback<MoviesResponse>> cb;
+
+    Call<MoviesResponse> mockedCall;
+
+    @Test
+    public void testApiResponse() {
+        mockApi = Mockito.mock(ApiInterface.class);
+        mockedCall = Mockito.mock(Call.class);
+
+        Mockito.when(mockApi.getTopRatedMovies("")).thenReturn(mockedCall);
+
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                Callback<MoviesResponse> callback = invocation.getArgumentAt(0, Callback.class);
+
+                callback.onResponse(mockedCall, Response.success(new MoviesResponse()));
+                // or callback.onResponse(mockedCall, Response.error(404. ...);
+                // or callback.onFailure(mockedCall, new IOException());
+
+                return null;
+            }
+        }).when(mockedCall).enqueue(Matchers.any(Callback.class));
+
+        // inject mocked ApiInterface to your presenter
+        // and then mock view and verify calls (and eventually use ArgumentCaptor to access call parameters)
+    }
+
+}
